@@ -3,33 +3,51 @@
 <head>
   <style type="text/css">
     body {
+      margin: 0;
+      padding: 0;
       overflow: hidden;
     }
 
     #items {
-      white-space: nowrap;
-      font-size: 0;
-      overflow-x: scroll;
+      display: flex;
+      gap: var(--homey-su-4);
+      overflow-x: auto;
       overflow-y: hidden;
       padding: var(--homey-su-4);
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      -webkit-overflow-scrolling: touch;
     }
 
     .item {
-      display: inline-block;
+      flex: 0 0 auto;
       position: relative;
-      margin-right: var(--homey-su-4);
       height: 170px;
-      aspect-ratio: 0.6666666667;
+      aspect-ratio: 2/3;
       border-radius: 5px;
       overflow: hidden;
+      background-color: rgba(255, 255, 255, 0.1);
       background-position: center center;
       background-repeat: no-repeat;
       background-size: cover;
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     }
 
-    .item:last-child {
-      margin-right: 0;
+    .item .title {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 4px 6px;
+      font-size: 11px;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.6);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   </style>
 </head>
@@ -41,23 +59,57 @@
     function onHomeyReady(Homey) {
       const $items = document.getElementById('items');
 
-      const { server } = Homey.getSettings();
+      let autoScrollTimer = null;
+
+      function getScrollStep() {
+        const firstItem = $items.querySelector('.item');
+        if (!firstItem) return 0;
+        const style = getComputedStyle($items);
+        const gap = parseInt(style.gap) || 0;
+        return firstItem.offsetWidth + gap;
+      }
+
+      function startAutoScroll() {
+        if (autoScrollTimer) return;
+        autoScrollTimer = setInterval(() => {
+          const step = getScrollStep();
+          if (step === 0) return;
+          const maxScroll = $items.scrollWidth - $items.clientWidth;
+          const target = $items.scrollLeft + step;
+          if (target >= maxScroll) {
+            $items.scrollTo({ left: 0, behavior: 'smooth' });
+          } else {
+            $items.scrollTo({ left: target, behavior: 'smooth' });
+          }
+        }, AUTO_SCROLL_INTERVAL);
+      }
+
+      const { server, scrollInterval } = Homey.getSettings();
+      const AUTO_SCROLL_INTERVAL = parseFloat(scrollInterval) >= 0 ? parseFloat(scrollInterval) * 1000 : 5000;
 
       Homey.ready({ height: 200 });
       Homey.api('GET', `/recently-added?serverMachineIdentifier=${server.machineIdentifier}`)
         .then(items => {
           for (const item of Object.values(items)) {
-            // Check item uniqueness
-            if (document.querySelector(`.item[style*="${item.image}"]`)) {
-              continue;
-            }
+            if (!item.thumb) continue;
 
-            // Add item
-            const $item = document.createElement('div');
-            $item.classList.add('item');
-            $item.style.backgroundImage = `url(${item.image})`;
-            $items.appendChild($item);
+            const $el = document.createElement('div');
+            $el.classList.add('item');
+            $el.style.backgroundImage = `url(${item.thumb})`;
+
+            const $title = document.createElement('div');
+            $title.classList.add('title');
+            $title.textContent = item.title || '';
+            $el.appendChild($title);
+
+            $items.appendChild($el);
           }
+
+          setTimeout(() => {
+            if ($items.scrollWidth > $items.clientWidth && AUTO_SCROLL_INTERVAL > 0) {
+              startAutoScroll();
+            }
+          }, 100);
         })
         .catch(console.error);
     }

@@ -286,6 +286,98 @@
             "filter": "driver_id=pms"
           }
         ]
+      },
+      {
+        "id": "server_update_available",
+        "title": {
+          "en": "Server update available"
+        },
+        "hint": {
+          "en": "Fires every update check interval while a new version of Plex Media Server is available to install."
+        },
+        "tokens": [
+          {
+            "type": "string",
+            "name": "old_version",
+            "title": {
+              "en": "Old Version"
+            },
+            "example": {
+              "en": "1.40.2.8395"
+            }
+          },
+          {
+            "type": "string",
+            "name": "new_version",
+            "title": {
+              "en": "New Version"
+            },
+            "example": {
+              "en": "1.41.0.8992"
+            }
+          },
+          {
+            "type": "string",
+            "name": "added",
+            "title": {
+              "en": "New Features"
+            },
+            "example": {
+              "en": "Improved playback performance."
+            }
+          },
+          {
+            "type": "string",
+            "name": "fixed",
+            "title": {
+              "en": "Fixed Issues"
+            },
+            "example": {
+              "en": "Fixed a crash when scanning libraries."
+            }
+          },
+          {
+            "type": "string",
+            "name": "downloadURL",
+            "title": {
+              "en": "Download"
+            },
+            "example": {
+              "en": "https://plex.tv/downloads/latest/1"
+            }
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=pms"
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "id": "server_update_available",
+        "title": {
+          "en": "Server update is available"
+        },
+        "titleFormatted": {
+          "en": "Server update is available"
+        },
+        "titleFormattedNegate": {
+          "en": "Server update is not available"
+        },
+        "hint": {
+          "en": "Check if a new version of Plex Media Server is available to install."
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=pms"
+          }
+        ]
       }
     ],
     "actions": [
@@ -397,6 +489,16 @@
           "title": {
             "en": "Server"
           }
+        },
+        {
+          "id": "scrollInterval",
+          "type": "number",
+          "label": {
+            "en": "Auto-scroll interval (seconds, 0 to disable)"
+          },
+          "value": 5,
+          "min": 0,
+          "max": 60
         }
       ],
       "api": {

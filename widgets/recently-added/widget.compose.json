@@ -9,6 +9,16 @@
       "title": {
         "en": "Server"
       }
+    },
+    {
+      "id": "scrollInterval",
+      "type": "number",
+      "label": {
+        "en": "Auto-scroll interval (seconds, 0 to disable)"
+      },
+      "value": 5,
+      "min": 0,
+      "max": 60
     }
   ],
   "api": {

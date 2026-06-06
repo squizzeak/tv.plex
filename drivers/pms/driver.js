@@ -5,7 +5,13 @@ const PlexDriver = require('../../lib/PlexDriver');
 module.exports = class PlexMediaServerDriver extends PlexDriver {
 
   async onInit() {
-    // Rescan
+    // Server update available condition
+    this.homey.flow.getConditionCard('server_update_available')
+      .registerRunListener(async ({ device }) => {
+        const { MediaContainer: status } = await device.api.getUpdaterStatus();
+        return Boolean(status && status.canInstall);
+      });
+
     this.homey.flow.getActionCard('rescan')
       .registerRunListener(async ({ device, library }) => {
         const { key } = library;
